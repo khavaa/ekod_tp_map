@@ -72,4 +72,11 @@ public interface CityRepository extends JpaRepository<City, Long> {
      */
     @Query("SELECT c.region, COUNT(c) FROM City c GROUP BY c.region ORDER BY c.region")
     List<Object[]> countCitiesByRegion();
+    
+    /**
+     * Recherche textuelle de villes par nom avec limite
+     */
+    @Query("SELECT c FROM City c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY c.population DESC")
+    List<City> findByNameContainingIgnoreCaseOrderByPopulationDesc(@Param("query") String query, int limit);
+    
 }

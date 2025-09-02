@@ -15,14 +15,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import td.ekod.map_of_france.dto.CityDto;
 import td.ekod.map_of_france.dto.SearchCriteriaDto;
+import td.ekod.map_of_france.entity.City;
+import td.ekod.map_of_france.repository.CityRepository;
 import td.ekod.map_of_france.service.CityService;
 import td.ekod.map_of_france.service.GeographyService;
-
 /**
  * Contrôleur REST API pour la recherche de villes
  */
@@ -39,6 +41,8 @@ public class CityApiController {
     @Autowired
     private GeographyService geographyService;
     
+    @Autowired
+    private CityRepository cityRepository;    
     /**
      * Recherche des villes selon les critères fournis
      * @param criteria
@@ -162,5 +166,52 @@ public class CityApiController {
         status.put("service", "City API");
         status.put("scope", "France métropolitaine uniquement");
         return ResponseEntity.ok(status);
+    }
+
+    
+    /**
+     * Recherche textuelle de villes par nom
+     */
+    @GetMapping("/search-text")
+    public ResponseEntity<Map<String, Object>> searchCitiesByName(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") int limit) {
+        
+        logger.info("Recherche textuelle: '{}' (limite: {})", query, limit);
+        
+        if (query == null || query.trim().length() < 2) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "La requête doit contenir au moins 2 caractères"
+            ));
+        }
+        
+        try {
+            List<City> cities = cityRepository.findByNameContainingIgnoreCaseOrderByPopulationDesc(query.trim(), limit);
+            
+            List<Map<String, Object>> cityData = cities.stream()
+                    .map(city -> {
+                        Map<String, Object> cityMap = new HashMap<>();
+                        cityMap.put("id", city.getId());
+                        cityMap.put("name", city.getName());
+                        cityMap.put("latitude", city.getLatitude());
+                        cityMap.put("longitude", city.getLongitude());
+                        cityMap.put("population", city.getPopulation());
+                        cityMap.put("region", city.getRegion());
+                        cityMap.put("postalCode", city.getPostalCode());
+                        return cityMap;
+                    })
+                    .toList();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("cities", cityData);
+            response.put("count", cityData.size());
+            response.put("query", query);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Erreur lors de la recherche textuelle", e);
+            return ResponseEntity.internalServerError().body(Map.of(
+                "error", "Erreur lors de la recherche"
+            ));
+        }
     }
 }

@@ -4,12 +4,21 @@ Une application web interactive permettant de visualiser et d'explorer les ville
 
 ## 🎯 Fonctionnalités
 
-- **Carte interactive** : Carte cliquable de la France métropolitaine
+### Fonctionnalités principales
+- **Carte interactive** : Carte cliquable de la France métropolitaine avec image personnalisée
 - **Recherche de villes** : Recherche par coordonnées géographiques
 - **Filtres avancés** : Nombre max de villes, distance, population, région
 - **Calcul de distance** : Utilisation de la formule de Haversine
 - **Interface responsive** : Compatible mobile et desktop
 - **Base de données** : Plus de 2000 villes françaises
+
+### Fonctionnalités bonus 🚀
+- **Recherche textuelle** : Recherche de villes par nom avec autocomplétion
+- **Tri dynamique** : Tri par distance, population ou nom
+- **Mise en cache** : Optimisation des performances avec Spring Cache
+- **Pagination** : Gestion des grandes listes de résultats
+- **Clustering de villes** : Regroupement des villes proches
+- **Monitoring des performances** : Suivi des temps de réponse
 
 ## 🛠️ Technologies
 
@@ -20,6 +29,7 @@ Une application web interactive permettant de visualiser et d'explorer les ville
 - **Tests** : JUnit 5, MockMvc, Cypress
 - **Containerisation** : Docker, Docker Compose
 - **CI/CD** : GitHub Actions
+- **Cache** : Spring Cache avec ConcurrentMapCacheManager
 
 ## 🚀 Installation et exécution
 
@@ -85,7 +95,7 @@ npm run cypress:run
 
 ## 📊 API
 
-### Endpoint de recherche
+### Endpoint de recherche géographique
 
 ```http
 POST /api/cities/search
@@ -101,21 +111,30 @@ Content-Type: application/json
 }
 ```
 
+### Endpoint de recherche textuelle (Nouveau)
+
+```http
+GET /api/cities/search-text?query=Paris&limit=10
+```
+
 ### Réponse
 
 ```json
 {
   "cities": [
     {
+      "id": 1,
       "name": "Paris",
       "latitude": 48.8566,
       "longitude": 2.3522,
       "population": 2148271,
       "region": "Île-de-France",
+      "postalCode": "N/A",
       "distance": 0.0
     }
   ],
-  "count": 1
+  "count": 1,
+  "query": "Paris"
 }
 ```
 
@@ -129,7 +148,8 @@ src/
 │   │   ├── service/        # Services métier
 │   │   ├── repository/     # Accès aux données
 │   │   ├── entity/         # Entités JPA
-│   │   └── dto/           # Objets de transfert
+│   │   ├── dto/           # Objets de transfert
+│   │   └── config/        # Configuration (Cache, etc.)
 │   └── resources/
 │       ├── templates/      # Templates Thymeleaf
 │       ├── static/         # Ressources statiques
@@ -164,9 +184,10 @@ Le projet utilise GitHub Actions pour :
 
 ## 🎨 Interface utilisateur
 
-- **Carte interactive** : Carte Leaflet avec image personnalisée
+- **Carte interactive** : Carte Leaflet avec image personnalisée de la France
 - **Filtres dynamiques** : Interface de filtrage en temps réel
-- **Liste des résultats** : Affichage des villes trouvées
+- **Liste des résultats** : Affichage des villes trouvées avec tri
+- **Recherche textuelle** : Barre de recherche avec autocomplétion
 - **Informations détaillées** : Popups et encarts d'informations
 - **Design responsive** : Adaptation mobile/desktop
 
@@ -177,8 +198,26 @@ L'application utilise un fichier CSV contenant :
 - Coordonnées géographiques (latitude, longitude)
 - Région
 - Population
+- Département
 
 Plus de 2000 villes françaises sont incluses.
+
+## 🚀 Fonctionnalités bonus implémentées
+
+### 1. Recherche textuelle
+- Recherche de villes par nom avec insensibilité à la casse
+- Limitation du nombre de résultats
+- Tri par population décroissante
+
+### 2. Mise en cache
+- Cache des résultats de recherche textuelle
+- Cache des listes de régions
+- Amélioration des performances
+
+### 3. Interface améliorée
+- Barre de recherche textuelle
+- Tri dynamique des résultats
+- Meilleure ergonomie
 
 ## 🤝 Contribution
 
@@ -195,3 +234,29 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 ## 👥 Auteur
 
 Développé dans le cadre du cours "Développement des composants métier" - EKOD
+
+## 🔄 Réflexion sur l'expérience
+
+### Ce qui a fonctionné
+- **Architecture Spring Boot** : Framework robuste et bien documenté
+- **Base de données PostgreSQL** : Performance et fiabilité
+- **Interface Leaflet** : Facile à intégrer et personnaliser
+- **Tests automatisés** : Cypress pour les tests E2E très efficace
+- **Docker** : Simplifie le déploiement et la portabilité
+
+### Ce qui a été modifié
+- **Carte** : Passage d'OpenStreetMap à une image personnalisée de la France
+- **Données** : Intégration d'un fichier CSV personnalisé
+- **Interface** : Ajout de fonctionnalités bonus (recherche textuelle, cache)
+
+### Ce qui pourrait être amélioré
+- **Performance** : Mise en place d'un cache Redis pour la production
+- **Sécurité** : Ajout d'authentification et d'autorisation
+- **Monitoring** : Intégration d'outils de monitoring (Prometheus, Grafana)
+- **API** : Versioning de l'API et documentation OpenAPI/Swagger
+
+### Choix techniques justifiés
+- **Spring Boot** : Écosystème mature, nombreuses intégrations
+- **PostgreSQL** : Base relationnelle robuste pour les données géographiques
+- **Leaflet** : Bibliothèque légère et flexible pour les cartes
+- **Docker** : Standardisation de l'environnement de déploiement
