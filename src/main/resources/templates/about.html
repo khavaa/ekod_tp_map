@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos - Carte Interactive de France</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <nav class="mb-4">
+            <a href="/" class="btn btn-outline-primary">← Retour à la carte</a>
+        </nav>
+        
+        <h1>🗺️ Carte Interactive de France</h1>
+        <p class="lead">Application web interactive pour explorer les villes françaises</p>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <h2>📋 Fonctionnalités</h2>
+                <ul>
+                    <li><strong>Carte interactive :</strong> Cliquez n'importe où en France pour rechercher des villes proches</li>
+                    <li><strong>Filtrage avancé :</strong> Filtrez par distance, population et région</li>
+                    <li><strong>Calcul de distance :</strong> Utilise la formule de Haversine pour des calculs précis</li>
+                    <li><strong>Interface responsive :</strong> Optimisée pour tous les écrans</li>
+                    <li><strong>Interaction bidirectionnelle :</strong> Survol synchronisé entre carte et liste</li>
+                </ul>
+                
+                <h2>🛠️ Technologies utilisées</h2>
+                <ul>
+                    <li><strong>Backend :</strong> Spring Boot 3.5.5, Java 17</li>
+                    <li><strong>Base de données :</strong> PostgreSQL</li>
+                    <li><strong>Frontend :</strong> Thymeleaf, Bootstrap 5, Leaflet</li>
+                    <li><strong>API :</strong> REST avec validation automatique</li>
+                    <li><strong>Conteneurisation :</strong> Docker & Docker Compose</li>
+                </ul>
+                
+                <h2>🎯 Utilisation</h2>
+                <ol>
+                    <li>Ajustez les filtres selon vos préférences</li>
+                    <li>Cliquez sur la carte à l'endroit qui vous intéresse</li>
+                    <li>Consultez la liste des villes trouvées à droite</li>
+                    <li>Survolez une ville dans la liste ou sur la carte pour voir ses détails</li>
+                </ol>
+            </div>
+            
+            <div class="col-md-4">
+                <h2>📊 Statistiques</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Base de données</h5>
+                        <div th:if="${statistics}">
+                            <div th:each="stat : ${statistics}" class="mb-2">
+                                <strong th:text="${stat[0]}">Région</strong>: 
+                                <span th:text="${stat[1]}">0</span> villes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">API Endpoints</h5>
+                        <ul class="list-unstyled">
+                            <li><code>POST /api/cities/search</code></li>
+                            <li><code>GET /api/cities/regions</code></li>
+                            <li><code>GET /api/cities/statistics</code></li>
+                            <li><code>GET /api/cities/{id}</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-5 pt-4 border-top text-muted">
+            <p>Développé avec Spring Boot et Leaflet - Projet de démonstration</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
