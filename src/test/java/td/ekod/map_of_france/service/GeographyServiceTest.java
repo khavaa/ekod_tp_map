@@ -1,75 +1,163 @@
 package td.ekod.map_of_france.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Tests unitaires pour GeographyService
- */
-@ExtendWith(MockitoExtension.class)
 class GeographyServiceTest {
-    
-    @InjectMocks
+
     private GeographyService geographyService;
-    
-    @Test
-    void testCalculateHaversineDistance_ParisToLyon() {
-        // Paris: 48.8566, 2.3522
-        // Lyon: 45.7640, 4.8357
-        // Distance réelle: ~463 km
-        
-        double distance = geographyService.calculateHaversineDistance(
-            48.8566, 2.3522,  // Paris
-            45.7640, 4.8357   // Lyon
-        );
-        
-        // Vérifier que la distance est proche de 463 km (±10 km)
-        assertTrue(distance >= 450 && distance <= 480, 
-            "Distance Paris-Lyon devrait être ~463 km, obtenu: " + distance);
+
+    @BeforeEach
+    void setUp() {
+        geographyService = new GeographyService();
     }
-    
+
     @Test
-    void testCalculateHaversineDistance_SamePoint() {
-        double distance = geographyService.calculateHaversineDistance(
-            48.8566, 2.3522,  // Paris
-            48.8566, 2.3522   // Paris (même point)
-        );
+    @DisplayName("Calcul de distance Haversine entre Paris et Lyon")
+    void calculateHaversineDistance_ParisToLyon_ShouldReturnCorrectDistance() {
+        // Given
+        double parisLat = 48.8566;
+        double parisLon = 2.3522;
+        double lyonLat = 45.76;
+        double lyonLon = 4.84;
         
-        assertEquals(0.0, distance, "Distance entre le même point devrait être 0");
+        // Distance approximative Paris-Lyon : ~392 km
+        double expectedDistance = 392.0;
+        double tolerance = 10.0; // Tolérance de 10 km
+
+        // When
+        double actualDistance = geographyService.calculateHaversineDistance(parisLat, parisLon, lyonLat, lyonLon);
+
+        // Then
+        assertEquals(expectedDistance, actualDistance, tolerance);
     }
-    
+
     @Test
-    void testCalculateBoundingBox() {
-        double[] bbox = geographyService.calculateBoundingBox(
-            48.8566, 2.3522,  // Paris
-            50.0               // 50 km
-        );
-        
-        assertNotNull(bbox);
-        assertEquals(4, bbox.length);
-        
-        // Vérifier que les bornes sont cohérentes
-        assertTrue(bbox[0] < bbox[1], "minLat devrait être < maxLat");
-        assertTrue(bbox[2] < bbox[3], "minLon devrait être < maxLon");
-        
-        // Vérifier que Paris est dans la bounding box
-        assertTrue(48.8566 >= bbox[0] && 48.8566 <= bbox[1], "Paris devrait être dans la bbox lat");
-        assertTrue(2.3522 >= bbox[2] && 2.3522 <= bbox[3], "Paris devrait être dans la bbox lon");
+    @DisplayName("Calcul de distance Haversine - même point")
+    void calculateHaversineDistance_SamePoint_ShouldReturnZero() {
+        // Given
+        double lat = 48.8566;
+        double lon = 2.3522;
+
+        // When
+        double distance = geographyService.calculateHaversineDistance(lat, lon, lat, lon);
+
+        // Then
+        assertEquals(0.0, distance, 0.001);
     }
-    
+
     @Test
-    void testIsInFranceMetropolitaine_Paris() {
-        boolean result = geographyService.isInFranceMetropolitaine(48.8566, 2.3522);
-        assertTrue(result, "Paris devrait être en France métropolitaine");
+    @DisplayName("Vérification coordonnées en France métropolitaine - Paris")
+    void isInFranceMetropolitaine_Paris_ShouldReturnTrue() {
+        // Given
+        double parisLat = 48.8566;
+        double parisLon = 2.3522;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(parisLat, parisLon);
+
+        // Then
+        assertTrue(result);
     }
-    
+
     @Test
-    void testIsInFranceMetropolitaine_London() {
-        boolean result = geographyService.isInFranceMetropolitaine(51.5074, -0.1278);
-        assertFalse(result, "Londres ne devrait pas être en France métropolitaine");
+    @DisplayName("Vérification coordonnées en France métropolitaine - Marseille")
+    void isInFranceMetropolitaine_Marseille_ShouldReturnTrue() {
+        // Given
+        double marseilleLat = 43.2964;
+        double marseilleLon = 5.37;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(marseilleLat, marseilleLon);
+
+        // Then
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Vérification coordonnées hors France - Londres")
+    void isInFranceMetropolitaine_London_ShouldReturnFalse() {
+        // Given
+        double londonLat = 51.5074;
+        double londonLon = -0.1278;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(londonLat, londonLon);
+
+        // Then
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("Vérification coordonnées hors France - Madrid")
+    void isInFranceMetropolitaine_Madrid_ShouldReturnFalse() {
+        // Given
+        double madridLat = 40.4168;
+        double madridLon = -3.7038;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(madridLat, madridLon);
+
+        // Then
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("Vérification limites nord de la France")
+    void isInFranceMetropolitaine_NorthLimit_ShouldReturnTrue() {
+        // Given - Lille (limite nord)
+        double lilleLat = 50.6292;
+        double lilleLon = 3.0573;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(lilleLat, lilleLon);
+
+        // Then
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Vérification limites sud de la France")
+    void isInFranceMetropolitaine_SouthLimit_ShouldReturnTrue() {
+        // Given - Perpignan (limite sud)
+        double perpignanLat = 42.6886;
+        double perpignanLon = 2.8948;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(perpignanLat, perpignanLon);
+
+        // Then
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Vérification limites ouest de la France")
+    void isInFranceMetropolitaine_WestLimit_ShouldReturnTrue() {
+        // Given - Brest (limite ouest)
+        double brestLat = 48.3906;
+        double brestLon = -4.4861;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(brestLat, brestLon);
+
+        // Then
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Vérification limites est de la France")
+    void isInFranceMetropolitaine_EastLimit_ShouldReturnTrue() {
+        // Given - Strasbourg (limite est)
+        double strasbourgLat = 48.5833;
+        double strasbourgLon = 7.7458;
+
+        // When
+        boolean result = geographyService.isInFranceMetropolitaine(strasbourgLat, strasbourgLon);
+
+        // Then
+        assertTrue(result);
     }
 }

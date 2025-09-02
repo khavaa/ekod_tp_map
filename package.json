@@ -1,0 +1,13 @@
+{
+  "name": "map-of-france",
+  "version": "1.0.0",
+  "description": "Interactive map of France with city search",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run --spec 'cypress/e2e/**/*.cy.js'"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.0"
+  }
+}
